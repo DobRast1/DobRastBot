@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ДобРаст | Приложение</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e8f5e9;
+            color: #2e4a2e;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #4caf50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 { margin: 0; font-size: 24px; }
+        .menu {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #666;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .menu-item.active { color: #4caf50; font-weight: bold; }
+        .menu-icon { font-size: 24px; margin-bottom: 5px; }
+        
+        .content { padding: 20px; }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+        .weekday { font-weight: bold; color: #81c784; font-size: 12px; margin-bottom: 10px;}
+        .day {
+            padding: 10px;
+            border-radius: 10px;
+            background: #f1f8e9;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .day:hover { background: #c8e6c9; }
+        .day.has-event {
+            background: #a5d6a7;
+            font-weight: bold;
+            border: 2px solid #4caf50;
+        }
+        .add-button {
+            display: block;
+            width: 100%;
+            background: #4caf50;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            margin-top: 20px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🌿 ДобРаст</h1>
+        <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.8;">Твой дневник растений</p>
+    </div>
+
+    <!-- Меню (вкладки) -->
+    <div class="menu">
+        <div class="menu-item active" onclick="showTab('calendar')">
+            <div class="menu-icon">📅</div>
+            Календарь
+        </div>
+        <div class="menu-item" onclick="showTab('notes')">
+            <div class="menu-icon">📝</div>
+            Записи
+        </div>
+        <div class="menu-item" onclick="showTab('profile')">
+            <div class="menu-icon">⚙️</div>
+            Профиль
+        </div>
+    </div>
+
+    <!-- Вкладка: Календарь -->
+    <div id="calendar-tab" class="content">
+        <h3 id="month-title" style="text-align:center; margin-top:0;"></h3>
+        <div class="calendar-grid" id="calendar-days">
+            <!-- Сюда JS вставит дни -->
+        </div>
+        <button class="add-button" onclick="alert('Тут будет форма добавления записи!')">+ Добавить запись</button>
+    </div>
+
+    <!-- Вкладка: Записи -->
+    <div id="notes-tab" class="content" style="display:none;">
+        <h3 style="text-align:center; margin-top:0;">Мои записи</h3>
+        <p style="text-align:center; color:#888;">Пока записей нет. Добавь первую!</p>
+    </div>
+
+    <!-- Вкладка: Профиль -->
+    <div id="profile-tab" class="content" style="display:none;">
+        <h3 style="text-align:center; margin-top:0;">Мой профиль</h3>
+        <p style="text-align:center; color:#888;">Здесь будет статистика твоих растений.</p>
+    </div>
+</div>
+
+<script>
+    // Логика переключения вкладок
+    function showTab(tabName) {
+        // Скрываем все вкладки
+        document.getElementById('calendar-tab').style.display = 'none';
+        document.getElementById('notes-tab').style.display = 'none';
+        document.getElementById('profile-tab').style.display = 'none';
+        
+        // Показываем нужную
+        document.getElementById(tabName + '-tab').style.display = 'block';
+
+        // Меняем активный цвет в меню
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => item.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    // Отрисовка календаря
+    const date = new Date();
+    const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+    document.getElementById('month-title').innerText = monthNames[date.getMonth()] + " " + date.getFullYear();
+
+    const grid = document.getElementById('calendar-days');
+    const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+    // Заголовки дней
+    weekdays.forEach(day => {
+        const el = document.createElement('div');
+        el.className = 'weekday';
+        el.innerText = day;
+        grid.appendChild(el);
+    });
+
+    // Дни (для красоты сдвинем на нужный день недели)
+    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+    for (let i = 1; i < (firstDay === 0 ? 7 : firstDay); i++) {
+        const empty = document.createElement('div');
+        grid.appendChild(empty);
+    }
+
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'day';
+        dayEl.innerText = i;
+        
+        // Для теста: сделаем 22-е число с записью
+        if (i === 22) {
+            dayEl.classList.add('has-event');
+            dayEl.title = "Посадил лимон";
+        }
+        
+        grid.appendChild(dayEl);
+    }
+</script>
+
+</body>
+</html>
