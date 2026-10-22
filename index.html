@@ -47,7 +47,8 @@
         .menu-item.active { color: #4caf50; font-weight: bold; }
         .menu-icon { font-size: 24px; margin-bottom: 5px; }
         
-        .content { padding: 20px; }
+        .content { padding: 20px; display: none; }
+        .content.active { display: block; }
         
         .calendar-grid {
             display: grid;
@@ -83,6 +84,14 @@
             border: none;
             cursor: pointer;
         }
+        .record-item {
+            background: #f1f8e9;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4caf50;
+        }
+        .record-date { font-size: 12px; color: #888; }
     </style>
 </head>
 <body>
@@ -93,98 +102,175 @@
         <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.8;">Твой дневник растений</p>
     </div>
 
-    <!-- Меню (вкладки) -->
     <div class="menu">
-        <div class="menu-item active" onclick="showTab('calendar')">
+        <div class="menu-item active" onclick="showTab('calendar', this)">
             <div class="menu-icon">📅</div>
             Календарь
         </div>
-        <div class="menu-item" onclick="showTab('notes')">
+        <div class="menu-item" onclick="showTab('notes', this)">
             <div class="menu-icon">📝</div>
             Записи
         </div>
-        <div class="menu-item" onclick="showTab('profile')">
+        <div class="menu-item" onclick="showTab('profile', this)">
             <div class="menu-icon">⚙️</div>
             Профиль
         </div>
     </div>
 
     <!-- Вкладка: Календарь -->
-    <div id="calendar-tab" class="content">
+    <div id="calendar-tab" class="content active">
         <h3 id="month-title" style="text-align:center; margin-top:0;"></h3>
-        <div class="calendar-grid" id="calendar-days">
-            <!-- Сюда JS вставит дни -->
-        </div>
-        <button class="add-button" onclick="alert('Тут будет форма добавления записи!')">+ Добавить запись</button>
+        <div class="calendar-grid" id="calendar-days"></div>
+        <button class="add-button" onclick="openModal()">+ Добавить запись</button>
     </div>
 
     <!-- Вкладка: Записи -->
-    <div id="notes-tab" class="content" style="display:none;">
+    <div id="notes-tab" class="content">
         <h3 style="text-align:center; margin-top:0;">Мои записи</h3>
-        <p style="text-align:center; color:#888;">Пока записей нет. Добавь первую!</p>
+        <div id="notes-list"></div>
     </div>
 
     <!-- Вкладка: Профиль -->
-    <div id="profile-tab" class="content" style="display:none;">
-        <h3 style="text-align:center; margin-top:0;">Мой профиль</h3>
-        <p style="text-align:center; color:#888;">Здесь будет статистика твоих растений.</p>
+    <div id="profile-tab" class="content">
+        <h3 style="text-align:center; margin-top:0;">Профиль</h3>
+        <p style="text-align:center;">Всего записей: <span id="total-notes">0</span></p>
+        <button class="add-button" style="background:#f44336;" onclick="clearAll()">Очистить весь дневник</button>
+    </div>
+</div>
+
+<!-- Модальное окно для добавления -->
+<div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div style="background:white; padding:20px; border-radius:15px; width:80%; max-width:300px;">
+        <h3 style="margin-top:0;">Новая запись</h3>
+        <input type="text" id="plant-name" placeholder="Название растения" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;">
+        <textarea id="plant-note" placeholder="Что случилось?" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box; height:80px;"></textarea>
+        <button onclick="saveNote()" style="width:100%; padding:10px; background:#4caf50; color:white; border:none; border-radius:5px; font-weight:bold;">Сохранить</button>
+        <button onclick="closeModal()" style="width:100%; padding:10px; background:#ddd; color:#333; border:none; border-radius:5px; margin-top:5px;">Отмена</button>
     </div>
 </div>
 
 <script>
-    // Логика переключения вкладок
-    function showTab(tabName) {
-        // Скрываем все вкладки
-        document.getElementById('calendar-tab').style.display = 'none';
-        document.getElementById('notes-tab').style.display = 'none';
-        document.getElementById('profile-tab').style.display = 'none';
-        
-        // Показываем нужную
-        document.getElementById(tabName + '-tab').style.display = 'block';
-
-        // Меняем активный цвет в меню
-        const menuItems = document.querySelectorAll('.menu-item');
-        menuItems.forEach(item => item.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+    // --- Логика вкладок ---
+    function showTab(tabName, el) {
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        document.getElementById(tabName + '-tab').classList.add('active');
+        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+        if(el) el.classList.add('active');
     }
 
-    // Отрисовка календаря
-    const date = new Date();
-    const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
-    document.getElementById('month-title').innerText = monthNames[date.getMonth()] + " " + date.getFullYear();
+    // --- Работа с записями (сохраняем в браузере) ---
+    let notes = JSON.parse(localStorage.getItem('dobrast_notes')) || [];
 
-    const grid = document.getElementById('calendar-days');
-    const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    function saveNote() {
+        const plant = document.getElementById('plant-name').value;
+        const note = document.getElementById('plant-note').value;
+        if(!plant || !note) return alert("Заполни все поля!");
 
-    // Заголовки дней
-    weekdays.forEach(day => {
-        const el = document.createElement('div');
-        el.className = 'weekday';
-        el.innerText = day;
-        grid.appendChild(el);
-    });
-
-    // Дни (для красоты сдвинем на нужный день недели)
-    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-    for (let i = 1; i < (firstDay === 0 ? 7 : firstDay); i++) {
-        const empty = document.createElement('div');
-        grid.appendChild(empty);
+        const newNote = {
+            id: Date.now(),
+            plant: plant,
+            note: note,
+            date: new Date().toLocaleDateString('ru-RU')
+        };
+        
+        notes.push(newNote);
+        localStorage.setItem('dobrast_notes', JSON.stringify(notes));
+        closeModal();
+        renderNotes();
+        renderCalendar(); // Обновляем календарь
     }
 
-    for (let i = 1; i <= daysInMonth; i++) {
-        const dayEl = document.createElement('div');
-        dayEl.className = 'day';
-        dayEl.innerText = i;
-        
-        // Для теста: сделаем 22-е число с записью
-        if (i === 22) {
-            dayEl.classList.add('has-event');
-            dayEl.title = "Посадил лимон";
+    function deleteNote(id) {
+        notes = notes.filter(n => n.id !== id);
+        localStorage.setItem('dobrast_notes', JSON.stringify(notes));
+        renderNotes();
+        renderCalendar();
+    }
+
+    function clearAll() {
+        if(confirm("Точно удалить все записи?")) {
+            notes = [];
+            localStorage.removeItem('dobrast_notes');
+            renderNotes();
+            renderCalendar();
         }
-        
-        grid.appendChild(dayEl);
     }
+
+    function renderNotes() {
+        const list = document.getElementById('notes-list');
+        list.innerHTML = '';
+        document.getElementById('total-notes').innerText = notes.length;
+
+        if(notes.length === 0) {
+            list.innerHTML = '<p style="text-align:center; color:#888;">Записей пока нет.</p>';
+            return;
+        }
+
+        notes.slice().reverse().forEach(n => {
+            const div = document.createElement('div');
+            div.className = 'record-item';
+            div.innerHTML = `
+                <div class="record-date">${n.date}</div>
+                <strong>${n.plant}</strong>: ${n.note}
+                <button onclick="deleteNote(${n.id})" style="float:right; border:none; background:none; color:red; cursor:pointer;">✖</button>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    // --- Модальное окно ---
+    function openModal() { document.getElementById('modal').style.display = 'flex'; }
+    function closeModal() { 
+        document.getElementById('modal').style.display = 'none'; 
+        document.getElementById('plant-name').value = '';
+        document.getElementById('plant-note').value = '';
+    }
+
+    // --- Календарь ---
+    function renderCalendar() {
+        const date = new Date();
+        const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+        document.getElementById('month-title').innerText = monthNames[date.getMonth()] + " " + date.getFullYear();
+
+        const grid = document.getElementById('calendar-days');
+        grid.innerHTML = '';
+        const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+        weekdays.forEach(day => {
+            const el = document.createElement('div');
+            el.className = 'weekday';
+            el.innerText = day;
+            grid.appendChild(el);
+        });
+
+        const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+        for (let i = 1; i < (firstDay === 0 ? 7 : firstDay); i++) {
+            grid.appendChild(document.createElement('div'));
+        }
+
+        // Получаем сегодняшнюю дату для сравнения
+        const todayStr = new Date().toLocaleDateString('ru-RU');
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'day';
+            dayEl.innerText = i;
+            
+            // Проверяем, есть ли записи на этот день (упрощенно, по числу)
+            // В реальном приложении нужно сравнивать полные даты, но для макета сойдет
+            const hasEvent = notes.some(n => n.date.startsWith(`${i}.`));
+            if (hasEvent) {
+                dayEl.classList.add('has-event');
+            }
+            
+            grid.appendChild(dayEl);
+        }
+    }
+
+    // Инициализация при загрузке
+    renderNotes();
+    renderCalendar();
 </script>
 
 </body>
