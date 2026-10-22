@@ -5,93 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ДобРаст | Приложение</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e8f5e9;
-            color: #2e4a2e;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            max-width: 400px;
-            width: 100%;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        .header {
-            background-color: #4caf50;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #e8f5e9; color: #2e4a2e; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { max-width: 400px; width: 100%; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background-color: #4caf50; color: white; padding: 20px; text-align: center; position: relative; }
         .header h1 { margin: 0; font-size: 24px; }
-        .menu {
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .menu-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #666;
-            font-size: 12px;
-            cursor: pointer;
-        }
+        .menu { display: flex; justify-content: space-around; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .menu-item { display: flex; flex-direction: column; align-items: center; color: #666; font-size: 12px; cursor: pointer; }
         .menu-item.active { color: #4caf50; font-weight: bold; }
         .menu-icon { font-size: 24px; margin-bottom: 5px; }
-        
         .content { padding: 20px; display: none; }
         .content.active { display: block; }
         
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            text-align: center;
-        }
-        .weekday { font-weight: bold; color: #81c784; font-size: 12px; margin-bottom: 10px;}
-        .day {
-            padding: 10px;
-            border-radius: 10px;
-            background: #f1f8e9;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        /* Календарь */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .weekday { font-weight: bold; color: #81c784; font-size: 12px; margin-bottom: 10px; }
+        .day { padding: 10px; border-radius: 10px; background: #f1f8e9; cursor: pointer; transition: 0.2s; }
         .day:hover { background: #c8e6c9; }
-        .day.has-event {
-            background: #a5d6a7;
-            font-weight: bold;
-            border: 2px solid #4caf50;
-        }
-        .add-button {
-            display: block;
-            width: 100%;
-            background: #4caf50;
-            color: white;
-            text-align: center;
-            padding: 15px;
-            border-radius: 10px;
-            text-decoration: none;
-            margin-top: 20px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-        }
-        .record-item {
-            background: #f1f8e9;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            border-left: 4px solid #4caf50;
-        }
-        .record-date { font-size: 12px; color: #888; }
+        .day.has-event { background: #a5d6a7; font-weight: bold; border: 2px solid #4caf50; }
+        
+        /* Записи */
+        .date-group { margin-bottom: 20px; }
+        .date-header { font-weight: bold; color: #4caf50; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .record-item { background: #f1f8e9; padding: 10px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #4caf50; position: relative; }
+        .record-photo { width: 100%; border-radius: 5px; margin-top: 5px; }
+        .record-actions { position: absolute; right: 10px; top: 10px; display: flex; gap: 5px; }
+        .record-actions button { background: none; border: none; cursor: pointer; font-size: 14px; padding: 0; }
+        
+        /* Форма и кнопки */
+        .add-button { display: block; width: 100%; background: #4caf50; color: white; text-align: center; padding: 15px; border-radius: 10px; text-decoration: none; margin-top: 20px; font-weight: bold; border: none; cursor: pointer; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100; }
+        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 80%; max-width: 300px; }
+        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        
+        /* Профиль */
+        .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: #ccc; margin: 0 auto 15px; background-size: cover; background-position: center; }
     </style>
 </head>
 <body>
@@ -103,99 +50,124 @@
     </div>
 
     <div class="menu">
-        <div class="menu-item active" onclick="showTab('calendar', this)">
-            <div class="menu-icon">📅</div>
-            Календарь
-        </div>
-        <div class="menu-item" onclick="showTab('notes', this)">
-            <div class="menu-icon">📝</div>
-            Записи
-        </div>
-        <div class="menu-item" onclick="showTab('profile', this)">
-            <div class="menu-icon">⚙️</div>
-            Профиль
-        </div>
+        <div class="menu-item active" onclick="showTab('calendar', this)"><div class="menu-icon">📅</div>Календарь</div>
+        <div class="menu-item" onclick="showTab('notes', this)"><div class="menu-icon">📝</div>Записи</div>
+        <div class="menu-item" onclick="showTab('profile', this)"><div class="menu-icon">👤</div>Профиль</div>
     </div>
 
-    <!-- Вкладка: Календарь -->
+    <!-- КАЛЕНДАРЬ -->
     <div id="calendar-tab" class="content active">
         <h3 id="month-title" style="text-align:center; margin-top:0;"></h3>
         <div class="calendar-grid" id="calendar-days"></div>
         <button class="add-button" onclick="openModal()">+ Добавить запись</button>
     </div>
 
-    <!-- Вкладка: Записи -->
+    <!-- ЗАПИСИ (С ГРУППИРОВКОЙ) -->
     <div id="notes-tab" class="content">
         <h3 style="text-align:center; margin-top:0;">Мои записи</h3>
         <div id="notes-list"></div>
     </div>
 
-    <!-- Вкладка: Профиль -->
+    <!-- ПРОФИЛЬ -->
     <div id="profile-tab" class="content">
-        <h3 style="text-align:center; margin-top:0;">Профиль</h3>
-        <p style="text-align:center;">Всего записей: <span id="total-notes">0</span></p>
-        <button class="add-button" style="background:#f44336;" onclick="clearAll()">Очистить весь дневник</button>
+        <h3 style="text-align:center; margin-top:0;">Мой профиль</h3>
+        <div class="profile-avatar" id="avatar-view"></div>
+        <input type="text" id="profile-name" placeholder="Твоё имя">
+        <input type="number" id="profile-age" placeholder="Твой возраст">
+        <input type="text" id="profile-photo" placeholder="Ссылка на аватарку (URL)">
+        <button class="add-button" onclick="saveProfile()">Сохранить профиль</button>
+        <p style="text-align:center; margin-top:15px;">Всего записей: <b id="total-notes">0</b></p>
+        <button class="add-button" style="background:#f44336;" onclick="clearAll()">Очистить дневник</button>
     </div>
 </div>
 
-<!-- Модальное окно для добавления -->
-<div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
-    <div style="background:white; padding:20px; border-radius:15px; width:80%; max-width:300px;">
-        <h3 style="margin-top:0;">Новая запись</h3>
-        <input type="text" id="plant-name" placeholder="Название растения" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;">
-        <textarea id="plant-note" placeholder="Что случилось?" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box; height:80px;"></textarea>
+<!-- МОДАЛЬНОЕ ОКНО -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0;" id="modal-title">Новая запись</h3>
+        <input type="hidden" id="edit-id">
+        <input type="text" id="plant-name" placeholder="Название растения">
+        <textarea id="plant-note" placeholder="Что случилось?" style="height:60px;"></textarea>
+        <input type="text" id="plant-photo" placeholder="Ссылка на фото (URL)">
         <button onclick="saveNote()" style="width:100%; padding:10px; background:#4caf50; color:white; border:none; border-radius:5px; font-weight:bold;">Сохранить</button>
-        <button onclick="closeModal()" style="width:100%; padding:10px; background:#ddd; color:#333; border:none; border-radius:5px; margin-top:5px;">Отмена</button>
+        <button onclick="closeModal()" style="width:100%; padding:10px; background:#ddd; border:none; border-radius:5px; margin-top:5px;">Отмена</button>
     </div>
 </div>
 
 <script>
-    // --- Логика вкладок ---
+    // --- ДАННЫЕ ---
+    let notes = JSON.parse(localStorage.getItem('dobrast_notes')) || [];
+    let profile = JSON.parse(localStorage.getItem('dobrast_profile')) || { name: '', age: '', photo: '' };
+    let selectedDateFilter = null;
+
+    // --- ВКЛАДКИ ---
     function showTab(tabName, el) {
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.getElementById(tabName + '-tab').classList.add('active');
         document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
         if(el) el.classList.add('active');
+        if(tabName === 'notes') renderNotes();
+        if(tabName === 'profile') loadProfile();
     }
 
-    // --- Работа с записями (сохраняем в браузере) ---
-    let notes = JSON.parse(localStorage.getItem('dobrast_notes')) || [];
+    // --- ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ ---
+    function openModal(id = null) {
+        document.getElementById('modal').style.display = 'flex';
+        if(id) {
+            const n = notes.find(x => x.id === id);
+            document.getElementById('modal-title').innerText = "Редактировать запись";
+            document.getElementById('edit-id').value = n.id;
+            document.getElementById('plant-name').value = n.plant;
+            document.getElementById('plant-note').value = n.note;
+            document.getElementById('plant-photo').value = n.photo || '';
+        } else {
+            document.getElementById('modal-title').innerText = "Новая запись";
+            document.getElementById('edit-id').value = '';
+            document.getElementById('plant-name').value = '';
+            document.getElementById('plant-note').value = '';
+            document.getElementById('plant-photo').value = '';
+        }
+    }
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
     function saveNote() {
+        const id = document.getElementById('edit-id').value;
         const plant = document.getElementById('plant-name').value;
         const note = document.getElementById('plant-note').value;
-        if(!plant || !note) return alert("Заполни все поля!");
+        const photo = document.getElementById('plant-photo').value;
+        if(!plant || !note) return alert("Заполни название и описание!");
 
-        const newNote = {
-            id: Date.now(),
-            plant: plant,
-            note: note,
-            date: new Date().toLocaleDateString('ru-RU')
-        };
-        
-        notes.push(newNote);
+        if(id) {
+            const idx = notes.findIndex(x => x.id == id);
+            notes[idx] = { ...notes[idx], plant, note, photo };
+        } else {
+            notes.push({ id: Date.now(), plant, note, photo, date: new Date().toLocaleDateString('ru-RU') });
+        }
         localStorage.setItem('dobrast_notes', JSON.stringify(notes));
         closeModal();
+        renderCalendar();
         renderNotes();
-        renderCalendar(); // Обновляем календарь
     }
 
     function deleteNote(id) {
-        notes = notes.filter(n => n.id !== id);
-        localStorage.setItem('dobrast_notes', JSON.stringify(notes));
-        renderNotes();
-        renderCalendar();
-    }
-
-    function clearAll() {
-        if(confirm("Точно удалить все записи?")) {
-            notes = [];
-            localStorage.removeItem('dobrast_notes');
-            renderNotes();
+        if(confirm("Удалить запись?")) {
+            notes = notes.filter(n => n.id !== id);
+            localStorage.setItem('dobrast_notes', JSON.stringify(notes));
             renderCalendar();
+            renderNotes();
         }
     }
 
+    function clearAll() {
+        if(confirm("Точно удалить ВСЕ записи?")) {
+            notes = [];
+            localStorage.removeItem('dobrast_notes');
+            renderCalendar();
+            renderNotes();
+        }
+    }
+
+    // --- ОТРИСОВКА ЗАПИСЕЙ (ГРУППИРОВКА) ---
     function renderNotes() {
         const list = document.getElementById('notes-list');
         list.innerHTML = '';
@@ -206,27 +178,35 @@
             return;
         }
 
-        notes.slice().reverse().forEach(n => {
-            const div = document.createElement('div');
-            div.className = 'record-item';
-            div.innerHTML = `
-                <div class="record-date">${n.date}</div>
-                <strong>${n.plant}</strong>: ${n.note}
-                <button onclick="deleteNote(${n.id})" style="float:right; border:none; background:none; color:red; cursor:pointer;">✖</button>
-            `;
-            list.appendChild(div);
+        const grouped = {};
+        notes.forEach(n => {
+            if(!grouped[n.date]) grouped[n.date] = [];
+            grouped[n.date].push(n);
+        });
+
+        Object.keys(grouped).reverse().forEach(date => {
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'date-group';
+            groupDiv.innerHTML = `<div class="date-header">${date}</div>`;
+            
+            grouped[date].forEach(n => {
+                const item = document.createElement('div');
+                item.className = 'record-item';
+                item.innerHTML = `
+                    <div class="record-actions">
+                        <button onclick="openModal(${n.id})">✏️</button>
+                        <button onclick="deleteNote(${n.id})">❌</button>
+                    </div>
+                    <strong>${n.plant}</strong>: ${n.note}
+                    ${n.photo ? `<img src="${n.photo}" class="record-photo" onerror="this.style.display='none'">` : ''}
+                `;
+                groupDiv.appendChild(item);
+            });
+            list.appendChild(groupDiv);
         });
     }
 
-    // --- Модальное окно ---
-    function openModal() { document.getElementById('modal').style.display = 'flex'; }
-    function closeModal() { 
-        document.getElementById('modal').style.display = 'none'; 
-        document.getElementById('plant-name').value = '';
-        document.getElementById('plant-note').value = '';
-    }
-
-    // --- Календарь ---
+    // --- КАЛЕНДАРЬ ---
     function renderCalendar() {
         const date = new Date();
         const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
@@ -239,36 +219,63 @@
 
         weekdays.forEach(day => {
             const el = document.createElement('div');
-            el.className = 'weekday';
-            el.innerText = day;
-            grid.appendChild(el);
+            el.className = 'weekday'; el.innerText = day; grid.appendChild(el);
         });
 
         const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-        for (let i = 1; i < (firstDay === 0 ? 7 : firstDay); i++) {
-            grid.appendChild(document.createElement('div'));
-        }
-
-        // Получаем сегодняшнюю дату для сравнения
-        const todayStr = new Date().toLocaleDateString('ru-RU');
+        for (let i = 1; i < (firstDay === 0 ? 7 : firstDay); i++) grid.appendChild(document.createElement('div'));
 
         for (let i = 1; i <= daysInMonth; i++) {
             const dayEl = document.createElement('div');
-            dayEl.className = 'day';
-            dayEl.innerText = i;
+            dayEl.className = 'day'; dayEl.innerText = i;
             
-            // Проверяем, есть ли записи на этот день (упрощенно, по числу)
-            // В реальном приложении нужно сравнивать полные даты, но для макета сойдет
             const hasEvent = notes.some(n => n.date.startsWith(`${i}.`));
-            if (hasEvent) {
-                dayEl.classList.add('has-event');
-            }
+            if (hasEvent) dayEl.classList.add('has-event');
             
+            dayEl.onclick = () => {
+                const filterDate = `${i}.${date.getMonth() + 1}.${date.getFullYear()}`;
+                showTab('notes', document.querySelectorAll('.menu-item')[1]);
+                filterNotesByDate(filterDate);
+            };
             grid.appendChild(dayEl);
         }
     }
 
-    // Инициализация при загрузке
+    function filterNotesByDate(filterDate) {
+        const list = document.getElementById('notes-list');
+        list.innerHTML = `<h3>Записи за ${filterDate}</h3><button onclick="renderNotes()" style="margin-bottom:10px; padding:5px 10px; cursor:pointer;">Показать все</button>`;
+        const filtered = notes.filter(n => n.date === filterDate);
+        if(filtered.length === 0) {
+            list.innerHTML += '<p style="text-align:center; color:#888;">На этот день записей нет.</p>';
+            return;
+        }
+        filtered.forEach(n => {
+            const item = document.createElement('div');
+            item.className = 'record-item';
+            item.innerHTML = `<strong>${n.plant}</strong>: ${n.note} ${n.photo ? `<img src="${n.photo}" class="record-photo">` : ''}`;
+            list.appendChild(item);
+        });
+    }
+
+    // --- ПРОФИЛЬ ---
+    function loadProfile() {
+        document.getElementById('profile-name').value = profile.name;
+        document.getElementById('profile-age').value = profile.age;
+        document.getElementById('profile-photo').value = profile.photo;
+        if(profile.photo) {
+            document.getElementById('avatar-view').style.backgroundImage = `url('${profile.photo}')`;
+        }
+    }
+    function saveProfile() {
+        profile.name = document.getElementById('profile-name').value;
+        profile.age = document.getElementById('profile-age').value;
+        profile.photo = document.getElementById('profile-photo').value;
+        localStorage.setItem('dobrast_profile', JSON.stringify(profile));
+        loadProfile();
+        alert("Профиль сохранен!");
+    }
+
+    // Запуск
     renderNotes();
     renderCalendar();
 </script>
