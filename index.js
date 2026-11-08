@@ -845,6 +845,9 @@ bot.on('message_created', async (ctx) => {
                 delete userStates[chatId];
                 const result = addPlant(chatId, plantName, loc || '', new Date().toISOString());
                 
+                // ✅ ДОБАВЛЕНО: Подтверждение добавления
+                await sendReply(ctx, result.text);
+                
                 passport.startPassport(send, chatId, askGigaChatService, plantName, loc);
                 return;
             }
@@ -946,6 +949,9 @@ bot.on('message_created', async (ctx) => {
                     const fixedPlantName = fixPlantNameCase(parsed.plant);
 
                     const addResult = addPlant(chatId, fixedPlantName, (parsed.location || 'дома').toLowerCase(), new Date().toISOString());
+                    
+                    // ✅ ДОБАВЛЕНО: Подтверждение добавления
+                    await sendReply(ctx, addResult.text);
                     
                     passport.startPassport(send, chatId, askGigaChatService, fixedPlantName, parsed.location || null);
                     
