@@ -143,7 +143,7 @@ async function askGigaChatService(prompt) {
     } catch (e) { return null; }
 }
 
-// --- ОТПРАВКА (ИСПРАВЛЕНО) ---
+// --- ОТПРАВКА ---
 async function sendReply(ctx, text, keyboard = null) {
     let safeText = String(text || '').trim();
     if (safeText.length > 3500) safeText = safeText.slice(0, 3400) + '...\n\n[Ответ сокращен]';
@@ -1023,7 +1023,7 @@ bot.on('message_created', async (ctx) => {
 
     } catch (error) {
         console.error("Критическая ошибка:", error);
-        // ИСПРАВЛЕНИЕ: безопасный вызов без markdown, чтобы сообщение точно ушло
+        // Безопасный вызов без markdown, чтобы сообщение точно ушло
         sendReply(ctx, "Упс, что-то пошло не так. Попробуй еще раз.", null).catch(() => {});
     }
 });
