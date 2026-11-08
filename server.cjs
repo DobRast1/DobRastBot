@@ -5,7 +5,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
-// Раздаем статические файлы (твой index.html) из текущей папки
+// Раздаем статические файлы (index.html) из текущей папки
 app.use(express.static(__dirname));
 
 // API для получения записей
