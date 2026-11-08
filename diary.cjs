@@ -150,7 +150,7 @@ function editRecord(userId, dateStr, index, newText) {
     return `✏️ Запись №${index} за ${dateStr} обновлена.`;
 }
 
-// ИСПРАВЛЕНО: точное сравнение действия, а не поиск подстроки в note
+// Точное сравнение действия, а не поиск подстроки в note
 function checkDangerousAction(chatId, action, dateStr, plant) {
     if (!action) return null;
 
