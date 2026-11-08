@@ -70,7 +70,7 @@ function defaultInterval(lowerName, place) {
     return 3;
 }
 
-// ИСПРАВЛЕНО: Теперь правильно склоняем прилагательные и существительные
+//Правильно склоняем прилагательные и существительные
 function tryFixName(name) {
     if (!name) return 'Растение';
     
@@ -156,7 +156,7 @@ function addPlant(userId, name, location, lastWatered) {
     plants.push(newPlant);
     savePlants(plants);
 
-    // ИСПРАВЛЕНО: Возвращаем объект с текстом, чтобы бот не выводил [object Object]
+    // Возвращаем объект с текстом, чтобы бот не выводил [object Object]
     return {
         text: `✅ Отлично! Записал: **${capitalize(newPlant.name)}** (${place}).${note}`,
         plantName: newPlant.name,
