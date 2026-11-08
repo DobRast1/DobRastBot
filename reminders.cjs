@@ -42,7 +42,7 @@ function loadState() {
             schedules: (data.schedules || []).map(s => ({
                 ...s,
                 chatId: s.chatId != null ? String(s.chatId) : null,
-                // ИСПРАВЛЕНО: сохраняем plantId, если он есть
+                // Сохраняем plantId, если он есть
                 plantId: s.plantId != null ? String(s.plantId) : null
             })),
             quiet: data.quiet || {}
@@ -155,7 +155,7 @@ function restoreTimers(send, chatId) {
         .forEach(r => armOnce(send, chatId, r));
 }
 
-// ИСПРАВЛЕНО: поиск по plantId, а не по имени
+// Поиск по plantId, а не по имени
 function markActionDone(chatId, plantId, action) {
     const st = loadState();
     const entry = st.schedules.find(s =>
