@@ -1038,4 +1038,3 @@ process.on('unhandledRejection', (reason) => console.error('Unhandled Rejection:
 process.on('uncaughtException', (err) => console.error('Uncaught Exception:', err));
 
 bot.start();
-console.log("ДобРаст (MAX) запущен! Паспорт растений, расписание, часы тишины и эскалация на месте. 🌿");
